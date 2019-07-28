@@ -21,6 +21,7 @@
 using std::string;
 using std::vector;
 using std::normal_distribution;
+using std::cout;
 
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
@@ -32,7 +33,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    *   (and others in this file).
    */
   num_particles = 500;  // TODO: Set the number of particles
-
+  cout << "begin init";
   std::default_random_engine gen;
   double std_x = std[0];
   double std_y = std[1];
@@ -55,6 +56,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    particles.push_back(new_particle);
  }
  is_initialized = true;
+ cout << "end init";
 }
 
 void ParticleFilter::prediction(double delta_t, double std_pos[],
@@ -66,6 +68,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
+   cout << "begin prediction";
    std::default_random_engine gen;
 
    for (int i = 0; i < num_particles; i++){
@@ -87,12 +90,13 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
      normal_distribution<double> dist_x(x1, std_pos[0]);
      normal_distribution<double> dist_y(y1, std_pos[1]);
      normal_distribution<double> dist_theta(t1, std_pos[2]);
-     
+
      particles[i].x = dist_x(gen);
      particles[i].y = dist_y(gen);
      particles[i].theta = dist_theta(gen);
-     
+
    }
+   cout << "end prediction";
 }
 
 void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
@@ -105,6 +109,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    *   probably find it useful to implement this method and use it as a helper
    *   during the updateWeights phase.
    */
+   cout << "begin dataAssociation";
    double lowest_dist;
    double obs_x, obs_y;
    double pred_x, pred_y;
@@ -125,6 +130,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
           }
       }
    }
+   cout << "end dataAssociation";
 
 }
 
@@ -144,9 +150,9 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   and the following is a good resource for the actual equation to implement
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
+   cout << "begin updateWeights";
    double std_x = std_landmark[0];
    double std_y = std_landmark[1];
-
    double part_x, part_y, part_t;
 
    for(int i = 0; i < num_particles; i++){
@@ -182,7 +188,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
           new_obs.id = o;
           new_obs.x = part_x + cos(part_t)*obs_x - sin(part_t)*obs_y;
           new_obs.y = part_y + sin(part_t)*obs_x + cos(part_t)*obs_y;
-        
+
           transformed.push_back(new_obs);
       }
     //for each observation, set to transformed observation
@@ -206,6 +212,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       }
     }
   }
+  cout << "end updateWeights";
 }
 
 void ParticleFilter::resample() {
@@ -215,6 +222,7 @@ void ParticleFilter::resample() {
    * NOTE: You may find std::discrete_distribution helpful here.
    *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
    */
+   cout << "begin resample";
    double max_w = 0.0;
    for(int i = 0; i < particles.size(); i++){
      weights.push_back(particles[i].weight);
@@ -233,7 +241,7 @@ void ParticleFilter::resample() {
      resampled.push_back(resampled[idx]);
    }
   particles = resampled;
-
+  cout << "end resample";
 }
 
 void ParticleFilter::SetAssociations(Particle& particle,
