@@ -177,14 +177,14 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         cout << "end updateWeights" << std::endl;
 }
 
-void ParticleFilter::resample() {
+void ParticleFilter::resample() { //revisit
         /**
          * TODO: Resample particles with replacement with probability proportional
          *   to their weight.
          * NOTE: You may find std::discrete_distribution helpful here.
          *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
          */
-        cout << "begin resample" << weights.size() << " " << particles.size() << std::endl;
+        cout << "begin resample" << std::endl;
         double max_w = 0.0;
         for(unsigned int i = 0; i < particles.size(); i++) {
                 weights[i] = particles[i].weight;
@@ -193,17 +193,17 @@ void ParticleFilter::resample() {
                         max_w = particles[i].weight;
                 }
         }
-  		cout << "check1" << std::endl;
+        //cout << "check1" << std::endl;
         vector<Particle> resampled;
         std::default_random_engine gen;
         std::discrete_distribution<int> w_distro(weights.begin(), weights.end());
         int idx;
         //std::discrete_distribution<int> idx_distro(0, num_particles-1);
-		cout << "check2" << std::endl;
+        //cout << "check2" << std::endl;
 
         for(int i = 0; i < num_particles; i++) {
                 idx = w_distro(gen);
-                resampled.push_back(resampled[idx]); //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+                resampled.push_back(particles[idx]);
         }
         particles = resampled;
         cout << "end resample" << std::endl;
