@@ -184,23 +184,26 @@ void ParticleFilter::resample() {
          * NOTE: You may find std::discrete_distribution helpful here.
          *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
          */
-        cout << "begin resample" << std::endl;
+        cout << "begin resample" << weights.size() << " " << particles.size() << std::endl;
         double max_w = 0.0;
         for(unsigned int i = 0; i < particles.size(); i++) {
                 weights[i] = particles[i].weight;
+          		cout << i << std::endl;
                 if (particles[i].weight > max_w) {
                         max_w = particles[i].weight;
                 }
         }
+  		cout << "check1" << std::endl;
         vector<Particle> resampled;
         std::default_random_engine gen;
         std::discrete_distribution<int> w_distro(weights.begin(), weights.end());
         int idx;
         //std::discrete_distribution<int> idx_distro(0, num_particles-1);
+		cout << "check2" << std::endl;
 
         for(int i = 0; i < num_particles; i++) {
                 idx = w_distro(gen);
-                resampled.push_back(resampled[idx]);
+                resampled.push_back(resampled[idx]); //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
         }
         particles = resampled;
         cout << "end resample" << std::endl;
