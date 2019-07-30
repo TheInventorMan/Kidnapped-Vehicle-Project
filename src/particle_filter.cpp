@@ -129,10 +129,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         double part_x, part_y, part_th;
 
         unsigned int o;
-  		unsigned int t;
+        unsigned int t;
         double obs_x, obs_y, new_obs_x, new_obs_y, lowest_dist;
         double mu_x, mu_y, temp_w, mvx, mvy;
-  		int nearest_assoc;
+        int nearest_assoc;
 
         unsigned int l;
         double land_x, land_y, dist_to_land, nearest_land_x, nearest_land_y;
@@ -140,73 +140,72 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         for(i = 0; i < particles.size(); i++) {
                 //for each particle, store particle coordinates
                 //cout << i << std::endl;
-          		vector<int> new_associations;
-          		vector<double> new_sense_x;
-          		vector<double> new_sense_y;
-          
-          		vector<LandmarkObs> transformed;
-          
+                vector<int> new_associations;
+                vector<double> new_sense_x;
+                vector<double> new_sense_y;
+                vector<LandmarkObs> transformed;
+
                 part_x = particles[i].x;
                 part_y = particles[i].y;
                 part_th = particles[i].theta;
                 particles[i].weight = 1.0;
                 weights[i] = 1.0;
-				//cout << i << std::endl;
-          		for(o = 0; o < observations.size(); o++) {
-                  LandmarkObs new_obs;
-                  obs_x = observations[o].x;
-                  obs_y = observations[o].y;
-                  new_obs.x = part_x + cos(part_th)*obs_x - sin(part_th)*obs_y;
-                  new_obs.y = part_y + sin(part_th)*obs_x + cos(part_th)*obs_y;
-                  transformed.push_back(new_obs);
+                //cout << i << std::endl;
+                for(o = 0; o < observations.size(); o++) {
+                        LandmarkObs new_obs;
+                        obs_x = observations[o].x;
+                        obs_y = observations[o].y;
+                        new_obs.x = part_x + cos(part_th)*obs_x - sin(part_th)*obs_y;
+                        new_obs.y = part_y + sin(part_th)*obs_x + cos(part_th)*obs_y;
+                        transformed.push_back(new_obs);
                 }
-         		
-          		lowest_dist = 1000000.0;
-                for(t = 0; t < transformed.size(); t++) {    
-                  		LandmarkObs t_obs = transformed[t];
-						//cout << map_landmarks.landmark_list.size() << std::endl;
+
+                lowest_dist = 1000000.0;
+                for(t = 0; t < transformed.size(); t++) {
+                        LandmarkObs t_obs = transformed[t];
+                        //cout << map_landmarks.landmark_list.size() << std::endl;
                         for(l = 0; l < map_landmarks.landmark_list.size(); l++) {
                                 land_x = map_landmarks.landmark_list[l].x_f;
                                 land_y = map_landmarks.landmark_list[l].y_f;
                                 //dist_to_land = dist(new_obs_x, new_obs_y, land_x, land_y);
-                          		dist_to_land = sqrt(pow((land_y-t_obs.y),2.0) + pow((land_x-t_obs.x),2.0));
-								//cout << dist_to_land << std::endl;
+                                dist_to_land = sqrt(pow((land_y-t_obs.y),2.0) + pow((land_x-t_obs.x),2.0));
+                                //cout << dist_to_land << std::endl;
                                 //if (dist_to_land <= sensor_range) {
-                                        if(dist_to_land < lowest_dist) {
-                                          		lowest_dist = dist_to_land;
-                                                nearest_land_x = land_x;
-                                                nearest_land_y = land_y;
-                                          		nearest_assoc = map_landmarks.landmark_list[l].id_i;
-                                          		//cout << particles[i].x << " " << land_x << " " << particles[i].y << " " << land_y << std::endl;
-                                        }
+                                if(dist_to_land < lowest_dist) {
+                                        lowest_dist = dist_to_land;
+                                        nearest_land_x = land_x;
+                                        nearest_land_y = land_y;
+                                        nearest_assoc = map_landmarks.landmark_list[l].id_i;
+                                        //cout << particles[i].x << " " << land_x << " " << particles[i].y << " " << land_y << std::endl;
+                                }
                                 //}
                         }
                         //cout << obs_x << " " << obs_y << " " << lowest_dist << std::endl;
                         mu_x = nearest_land_x;
                         mu_y = nearest_land_y;
-						//cout << new_obs_x << " " << mu_x << " " << new_obs_y << " " << mu_y << std::endl;
-                  		//cout << new_obs_x << " " << nearest_land_x << " " << new_obs_y << " " << nearest_land_y << std::endl;
-                  
+                        //cout << new_obs_x << " " << mu_x << " " << new_obs_y << " " << mu_y << std::endl;
+                        //cout << new_obs_x << " " << nearest_land_x << " " << new_obs_y << " " << nearest_land_y << std::endl;
+
                         temp_w = 1/(2 * M_PI * std_x * std_y);
                         mvx = pow(t_obs.x-mu_x, 2)/(2 * pow(std_x, 2));
                         mvy = pow(t_obs.y-mu_y, 2)/(2 * pow(std_y, 2));
                         temp_w *= exp(-(mvx+mvy));
-                  
-						//cout << temp_w << std::endl;
-                  		if(temp_w > 0){
-                        		particles[i].weight *= temp_w;
-                        		weights[i] *= temp_w;
-                          		new_associations.push_back(nearest_assoc);
-                                new_sense_x.push_back(new_obs_x);
-                          		new_sense_y.push_back(new_obs_y);
+
+                        //cout << temp_w << std::endl;
+                        if(temp_w > 0) {
+                                particles[i].weight *= temp_w;
+                                weights[i] *= temp_w;
                         }
-                  		//if(lowest_dist == 1000000.0){
+                        new_associations.push_back(nearest_assoc);
+                        new_sense_x.push_back(new_obs_x);
+                        new_sense_y.push_back(new_obs_y);
+                        //if(lowest_dist == 1000000.0){
                         //	particles[i].weight = 0.0;
-                        //  	weights[i] = 0.0;
+                        //    weights[i] = 0.0;
                         //}
 
                 }
-          		particles[i].associations = new_associations;  //push_back(nearest_assoc);
+                particles[i].associations = new_associations;  //push_back(nearest_assoc);
                 particles[i].sense_x = new_sense_x; //push_back(new_obs_x);
                 particles[i].sense_y = new_sense_y; //push_back(new_obs_y);
                 //cout << "particle " << i << " weight updated" << std::endl;
